@@ -1,0 +1,152 @@
+<style>
+  ul {
+    list-style: none;
+  }
+
+  * {
+    text-align: center;
+  }
+
+  .inside {
+    box-sizing: border-box;
+    border: 1px solid;
+  }
+</style>
+
+
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>To do List</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    class TodoApp extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = { items: [], text: '' };
+        this.handleChange = this.handleChange.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
+        this.onChangeBox = this.onChangeBox.bind(this);
+        this.hideCompleted = this.hideCompleted.bind(this);
+      }
+
+      render() {
+        return (
+          <div>
+            <h1>Welcome to my To Do list!</h1>
+            <div class="inside">
+              <input type="checkbox" id="hidebox" onChange={this.hideCompleted} /> Hide completed tasks!
+              <hr size="2" width="95%" color="black" />
+              <TodoList items={this.state.items} onChangeBox={this.onChangeBox} />
+              <hr size="2" width="95%" color="black" />
+              <form onSubmit={this.handleSubmit}>
+                <label htmlFor="new-task">
+                </label>
+                <input
+                  id="new-task"
+                  onChange={this.handleChange}
+                  value={this.state.text}
+                />
+                <button>
+                  Add #{this.state.items.length + 1}
+                </button>
+              </form>
+            </div>
+          </div>
+        );
+      }
+
+      hideCompleted(e) {
+        var box = document.getElementById("hidebox");
+        if (box.checked) {
+          this.setState(({ items }) => ({
+            items: items.map(el => 
+              el.done ? { ...el, hidden: !el.hidden } : el
+            )
+          }));
+        }
+        else {
+          this.setState(({ items }) => ({
+            items: items.map(el => 
+            el.hidden ? { ...el, hidden: !el.hidden } : el
+            )
+          }));
+        };
+      }
+
+      onChangeBox = item => {
+        var box = document.getElementById("hidebox");
+        if (box.checked) {
+          this.setState(({ items }) => ({
+          items: items.map(el =>
+            el.id === item.id ? { ...el, done: !el.done, hidden: !el.done } : el
+          )
+        }));
+        }
+        else{
+          this.setState(({ items }) => ({
+          items: items.map(el =>
+            el.id === item.id ? { ...el, done: !el.done } : el
+          )
+        }));
+        };
+      };
+
+      handleChange(e) {
+        this.setState({ text: e.target.value });
+      }
+
+      handleSubmit(e) {
+        e.preventDefault();
+        if (this.state.text.length === 0) {
+          return;
+        }
+        const newItem = {
+          text: this.state.text,
+          id: Date.now(),
+          done: false,
+          hidden: false
+        };
+        this.setState(state => ({
+          items: state.items.concat(newItem),
+          text: ''
+        }));
+      }
+    }
+
+    class TodoList extends React.Component {
+      render() {
+        if (this.props.items.length == 0) {
+          return (<p>Nothing to do...</p>)
+        };
+        return (
+          <ul>
+            {this.props.items.map(item => 
+              item.hidden ? 
+              null
+              : 
+              <li key={item.id} style={{ textDecoration: item.done ? "line-through" : null }}>
+                <input type="checkbox" onChange={() => this.props.onChangeBox(item)} defaultChecked={item.done} />
+                {item.text}
+              </li>
+            )}
+          </ul>
+        );
+      }
+    }
+
+    const container = document.getElementById('root');
+    const root = ReactDOM.createRoot(container);
+    root.render(<TodoApp />);
+
+  </script>
+</body>
+</html>
